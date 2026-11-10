@@ -11,7 +11,7 @@ jobs:
   code:
     name: Code scan (Bandit)
     runs-on: ubuntu-latest
-    continue-on-error: true # warn for now; Drill 5 sets the threshold
+    continue-on-error: false # Gate: Fail CI if Bandit detects security vulnerabilities in Python code
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -45,8 +45,8 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: campus-notifier:dev
-          severity: HIGH,CRITICAL
-          exit-code: "0" # warn for now; Drill 5 flips this
+          severity: CRITICAL
+          exit-code: "1" # Gate: Fail build if CRITICAL vulnerabilities exist in container image
           format: table
 
   iac:
@@ -60,4 +60,4 @@ jobs:
           directory: .
           framework: terraform
           quiet: true
-          soft_fail: true # warn for now; Drill 5 flips this to false
+          soft_fail: false # Gate: Fail build on unsuppressed Terraform security misconfigurations
