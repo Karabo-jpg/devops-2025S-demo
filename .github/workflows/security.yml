@@ -33,3 +33,31 @@ jobs:
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  image:
+    name: Image scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the image
+        run: docker build -t campus-notifier:dev .
+      - name: Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: campus-notifier:dev
+          severity: HIGH,CRITICAL
+          exit-code: "0" # warn for now; Drill 5 flips this
+          format: table
+
+  iac:
+    name: IaC scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkov
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: .
+          framework: terraform
+          quiet: true
+          soft_fail: true # warn for now; Drill 5 flips this to false
